@@ -3,7 +3,6 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 //Main server to host multiple EVMs
-votingdata = null;
 totalevms = 0;
 currentlist = '';
 
@@ -35,7 +34,7 @@ io.on('connection',(socket)=>
 });
 
 
-http.listen(1227,'192.168.1.8',()=>
+http.listen(process.env.PORT || 3000,port, ()=>
 {
 	console.log('Server initiated');
 });
