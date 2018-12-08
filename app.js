@@ -9,7 +9,7 @@ currentlist = '';
 
 app.get('/',(req,res)=>
 {
-	res.sendFile('/home/ramrathi/Desktop/WebProjects/bcapp/index.html');
+	res.sendfile('index.html');
 });
 
 
