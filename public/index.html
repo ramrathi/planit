@@ -1,0 +1,197 @@
+<html>
+	<head>
+    
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+		<title>PlanIt</title>
+
+    <style>
+
+      * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #333;
+}
+
+input {
+    width: 250px;
+    padding: 5px;
+    margin: 10px  10px 10px 6px;
+    -webkit-box-sizing: border-box; 
+    -moz-box-sizing: border-box;    
+    box-sizing: border-box;         
+}
+
+table {
+  text-align: left;
+  line-height: 40px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 2px solid #ed1c40;
+  width: 500px;
+  margin: 50px auto;
+  border-radius: .25rem;
+}
+
+thead tr:first-child {
+  background: #ed1c40;
+  color: #fff;
+  border: none;
+}
+
+th:first-child,
+td:first-child {
+  padding: 0 15px 0 20px;
+}
+
+th {
+  font-weight: 500;
+}
+
+thead tr:last-child th {
+  border-bottom: 3px solid #ddd;
+}
+
+tbody tr:hover {
+  background-color: #f2f2f2;
+  cursor: default;
+}
+
+tbody tr:last-child td {
+  border: none;
+}
+
+tbody td {
+  border-bottom: 1px solid #ddd;
+}
+
+td:last-child {
+  text-align: right;
+  padding-right: 10px;
+}
+
+.button {
+  color: #aaa;
+  cursor: pointer;
+  vertical-align: middle;
+  margin-top: -4px;
+}
+
+.done:hover {
+  color:#008000;
+}
+
+.ongoing:hover {
+  color: #ffcc00;
+}
+
+.delete:hover {
+  color: #dc2a2a;
+}
+
+.info:hover {
+  color:#000000;
+}
+
+.note_add:hover{
+  color:#0000ff;
+
+  </style>
+		<script src = "/socket.io/socket.io.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	   <script>
+      
+            var socket = io();
+
+      function sendMessage()
+      {
+        task = document.getElementById('task_input').value;
+        if(task.length != 0)
+        {
+          socket.emit('newmsg',task);
+        }
+      };
+
+      function autonumber()
+      {
+        var rows = document.getElementsByTagName('tr');
+        for(i = 2;i<rows.length;i++)
+        {
+          rows[i].id = i;
+          if(i%2!=0)
+          {
+            rows[i].style.background = "white";
+          }
+          else
+          {
+            rows[i].style.background = '#F5F5F5';
+          }
+          rows[i].cells[0].innerHTML = rows[i].rowIndex-1;
+          rows[i].cells[2].innerHTML = '<td><i id = "'+i+'"class = "material-icons button done">done_outline</i><i id = "'+i+'"class = "material-icons button ongoing">timelapse</i><i id = "'+i+'"class = "material-icons button delete" onclick = "deletetask(this.id)">delete</i><i id = "'+i+'"class = "material-icons button info">info</i></td></td>'; 
+        }
+      };
+
+      function deletetask(index)
+      {
+        var task = document.getElementsByTagName('tr')[index].cells[1].innerHTML;
+        socket.emit('deletetask',{task: task, index: index});
+      };
+
+      socket.on('taskdeleted',(index)=>
+      {
+        var table = document.getElementById('task_table');
+        table.deleteRow(index);
+        autonumber();
+
+      });
+      
+      socket.on('getmessage',(task)=>
+      {
+        table = document.getElementById('task_table');
+        var row = table.insertRow(2)
+        row.insertCell();
+        var cell = row.insertCell();
+        cell.innerHTML = '<td></td><td>'+task+'</td>'
+        row.insertCell().innerHTML = '<td><i class = "material-icons button edit">edit</i><i class = "material-icons button delete" onclick = "deletetask(this)">delete</i></td></td>';
+
+       autonumber();
+
+        document.getElementById('task_input').value = "";
+      });
+
+      socket.on('cleartable',()=>
+      {
+       document.getElementById('messagebox').innerHTML = "";
+       document.getElementById('task_input').value = "";
+
+      });
+ 
+     </script>
+  </head>
+
+	<body>
+
+<table id= "task_table">
+  <thead>
+    <tr>
+      <th colspan="3"><h1>To Do List</h1></th>
+    </tr>
+    <tr width = "1000">
+      <th>
+      	 <i class="material-icons button note_add" onclick= "sendMessage()" >note_add</i>
+      </th>
+      <th colspan="2">
+		<input type="text" id="task_input" value="" placeholder="Enter Task">
+      </th>
+    </tr>
+  </thead>
+  <tbody id = "messagebox">
+  </tbody>
+</table>
+</body>
+	
+</html>	

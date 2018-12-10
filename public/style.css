@@ -9,6 +9,15 @@ body {
   color: #333;
 }
 
+input {
+    width: 250px;
+    padding: 5px;
+    margin: 10px  10px 10px 6px;
+    -webkit-box-sizing: border-box; 
+    -moz-box-sizing: border-box;    
+    box-sizing: border-box;         
+}
+
 table {
   text-align: left;
   line-height: 40px;
@@ -70,4 +79,8 @@ td:last-child {
 
 .delete:hover {
   color: #dc2a2a;
+}
+
+.note_add:hover{
+  color:#008000;
 }

@@ -2,39 +2,49 @@ const app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
-//Main server to host multiple EVMs
-totalevms = 0;
-currentlist = '';
+totalnodes = 0;
+currentlist=[];
 
 app.get('/',(req,res)=>
 {
-	res.sendfile('index.html');
+	res.sendfile('public/index.html');
 });
-
 
 io.on('connection',(socket)=>
 {
-	totalevms++;
-	console.log('['+totalevms+'] EVMs connected');
-	socket.emit('getmessage',currentlist);
-
+	totalnodes++;
+	console.log('['+totalnodes+'] nodes connected');
 	//Getting new node up to date with current data
+	
+	socket.emit('cleartable');
+	for(i =0;i<currentlist.length;i++)
+		socket.emit('getmessage',currentlist[i]);
+
 	socket.on('newmsg',(data)=>
 	{
-		currentlist = data.html;
-		io.sockets.emit('getmessage',data.html);
+		currentlist.push(data);
+		//console.log(currentlist);
+		io.sockets.emit('getmessage',data);
+	});
+
+	socket.on('deletetask',(data)=>
+	{
+		var i = currentlist.indexOf(data.task);
+		console.log('Task "'+ data.task+'" deleted');
+		currentlist.splice(i,1);
+		io.sockets.emit('taskdeleted',data.index);
 	});
 
 	socket.on('disconnect',()=>
 	{
 		console.log('EVM disconnected');
-		totalevms--;
-		console.log('['+totalevms+'] EVMs connected');
+		totalnodes--;
+		console.log('['+totalnodes+'] nodes connected');
 	});
 });
 
 
-http.listen(process.env.PORT || 3000,port, ()=>
+http.listen(process.env.PORT || 3000, ()=>
 {
 	console.log('Server initiated');
 });
